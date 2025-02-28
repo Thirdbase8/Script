@@ -1,0 +1,35 @@
+local player = game.Players.LocalPlayer
+local replicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Function to add a new smelting object
+local function addSmeltingObject()
+    local tool = Instance.new("Tool") -- Create a new Tool instance
+    replicatedStorage:WaitForChild("Add_Smelting_Object"):FireServer(tool)
+end
+
+-- Function to claim smelted objects
+local function claimSmeltedObjects()
+    local smeltingFolder = player:FindFirstChild("Smelting_Folder")
+
+    if not smeltingFolder then
+        warn("Smelting_Folder not found for player.")
+        return
+    end
+
+    for _, target in ipairs(smeltingFolder:GetChildren()) do
+        if target:IsA("NumberValue") then
+            local id = target:FindFirstChild("ID")
+            
+            if id and id:IsA("NumberValue") then
+                replicatedStorage:WaitForChild("Claim_Smelted_Object"):FireServer(target.Name, id.Value)
+            else
+                warn("No valid ID found for " .. target.Name)
+            end
+        end
+    end
+end
+
+-- Execute the sequence
+addSmeltingObject()
+task.wait(0.5) -- Wait before claiming
+claimSmeltedObjects()
