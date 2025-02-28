@@ -1,0 +1,2 @@
+# Script
+Desert detectors testing
