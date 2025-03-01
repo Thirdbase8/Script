@@ -1,0 +1,1 @@
+game:GetService("ReplicatedStorage"):WaitForChild("Sell_Inventory"):FireServer()
