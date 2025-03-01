@@ -1,58 +1,124 @@
--- Highlight Toggle Script for Loot folder in Roblox
+_G.ShowLootNames = true -- Toggle for Loot Names
+-- Roblox Script to toggle highlighting of all objects in the Loot folder
 
-local highlightEnabled = false -- State variable to track if highlights are on
+local nameFolder = Instance.new("Folder")
+nameFolder.Name = "0x" .. tostring(math.random(10000, 99999))
+nameFolder.Parent = workspace
+-- Get the Loot folder in Workspace
+local lootFolder = game.Workspace:WaitForChild("Loot")
 
+local function createNameDisplay(loot)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Adornee = loot
+    billboard.Size = UDim2.new(4, 0, 1, 0)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = loot
+-- Store the current state of highlighting
+local highlightEnabled = true
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = loot.Name
+    textLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+    textLabel.TextStrokeTransparency = 0.5
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.Parent = billboard
+-- Function to create a highlight for each object
 local function createHighlight(object)
-   if not object:FindFirstChild("Highlight") then
-      local highlight = Instance.new("Highlight")
-      highlight.Name = "Highlight"
-      highlight.Parent = object
-      highlight.Adornee = object
-      highlight.FillColor = Color3.fromRGB(255, 255, 0)  -- Yellow highlight
-      highlight.FillTransparency = 0.5
-      highlight.OutlineColor = Color3.fromRGB(255, 255, 255)  -- White outline
-      highlight.OutlineTransparency = 0.3
-   end
+    -- Check if the object already has a highlight to avoid duplicates
+    if not object:FindFirstChild("Highlight") then
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "Highlight"
+        highlight.Parent = object
+        highlight.Adornee = object
+        highlight.FillColor = Color3.fromRGB(255, 255, 0)  -- Yellow highlight
+        highlight.FillTransparency = 0.5
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)  -- White outline
+        highlight.OutlineTransparency = 0.3
+    end
 end
 
+local function clearAll()
+    for _, loot in ipairs(workspace.Loot:GetChildren()) do
+        local billboard = loot:FindFirstChildWhichIsA("BillboardGui")
+        if billboard then
+            billboard:Destroy()
+        end
+-- Function to remove the highlights
 local function removeHighlight(object)
-   local highlight = object:FindFirstChild("Highlight")
-   if highlight then
-      highlight:Destroy()
-   end
+    local highlight = object:FindFirstChild("Highlight")
+    if highlight then
+        highlight:Destroy()
+    end
 end
 
+local function updateNameDisplays()
+    for _, loot in ipairs(workspace.Loot:GetChildren()) do
+        if loot:IsA("Model") and not loot:FindFirstChildWhichIsA("BillboardGui") then
+            createNameDisplay(loot)
+-- Function to toggle highlights
 local function toggleHighlights()
-   local lootFolder = game.Workspace:WaitForChild("Loot")
-
-   if highlightEnabled then
-      -- Add highlights to all items in Loot folder
-      for _, item in pairs(lootFolder:GetChildren()) do
-         createHighlight(item)
-      end
-
-      lootFolder.ChildAdded:Connect(function(child)
-         createHighlight(child)
-      end)
-      
-      lootFolder.ChildRemoved:Connect(function(child)
-         removeHighlight(child)
-      end)
-   else
-      -- Remove highlights from all items in Loot folder
-      for _, item in pairs(lootFolder:GetChildren()) do
-         removeHighlight(item)
-      end
-   end
+    highlightEnabled = not highlightEnabled
+    if highlightEnabled then
+        -- Reapply highlights to all objects in Loot
+        for _, item in pairs(lootFolder:GetChildren()) do
+            createHighlight(item)
+        end
+    else
+        -- Remove highlights from all objects in Loot
+        for _, item in pairs(lootFolder:GetChildren()) do
+            removeHighlight(item)
+        end
+    end
 end
 
--- Create the toggle (you can attach this to your UI system)
+local debounce = false
+
+local connection
+if _G.ShowLootNames then
+    connection = game:GetService("RunService").Heartbeat:Connect(function()
+        if not debounce then
+            debounce = true
+            updateNameDisplays()
+            task.wait(0.5) -- Adjust delay for performance
+            debounce = false
+        end
+    end)
+-- Initial highlight setup when the script starts
+if highlightEnabled then
+    for _, item in pairs(lootFolder:GetChildren()) do
+        createHighlight(item)
+    end
+end
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    if not _G.ShowLootNames then
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+        clearAll()
+-- Listen for any new items added to the Loot folder and add or remove highlights
+lootFolder.ChildAdded:Connect(function(child)
+    if highlightEnabled then
+        createHighlight(child)
+    end
+end)
+
+lootFolder.ChildRemoved:Connect(function(child)
+    if highlightEnabled then
+        removeHighlight(child)
+    end
+end)
+
+-- Bind the toggle to a key press (for example, "T" key)
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
 
-    -- Toggle highlighting with the "H" key (you can change the key as desired)
-    if input.KeyCode == Enum.KeyCode.H then
-        highlightEnabled = not highlightEnabled
-        toggleHighlights()  -- Call the function to update the highlights
+    if input.KeyCode == Enum.KeyCode.T then
+        toggleHighlights()
     end
 end)
