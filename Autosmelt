@@ -1,5 +1,18 @@
 local autoSmeltEnabled = true
 
+-- List of keywords to filter out
+local excludedKeywords = {"pack", "book", "xray vision", "Shovel", "detector"}
+
+-- Function to check if the item's name contains any excluded keywords
+local function isExcluded(item)
+    for _, keyword in ipairs(excludedKeywords) do
+        if string.lower(item.Name):find(string.lower(keyword)) then
+            return true
+        end
+    end
+    return false
+end
+
 -- Function to smelt items
 local function smeltItem(item)
     -- Define what should happen when the item is smelted
@@ -15,9 +28,9 @@ while autoSmeltEnabled do
     -- Get all items in the Backpack of the LocalPlayer
     local backpack = game.Players.LocalPlayer.Backpack:GetChildren()
 
-    -- Equip all tools from the Backpack (make sure it's a Tool)
+    -- Equip all tools from the Backpack (make sure it's a Tool and not excluded)
     for _, item in ipairs(backpack) do
-        if item:IsA("Tool") then
+        if item:IsA("Tool") and not isExcluded(item) then
             -- Move the tool to the character to equip it
             item.Parent = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
             print("Equipped " .. item.Name)
@@ -27,7 +40,7 @@ while autoSmeltEnabled do
     -- Now, smelt all tools equipped on the character
     local characterItems = game.Players.LocalPlayer.Character:GetChildren()
     for _, item in ipairs(characterItems) do
-        if item:IsA("Tool") then
+        if item:IsA("Tool") and not isExcluded(item) then
             smeltItem(item)
         end
     end
