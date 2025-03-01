@@ -15,10 +15,10 @@ while autoSmeltEnabled do
     -- Get all items in the Backpack
     local backpack = game.Players.LocalPlayer.Backpack:GetChildren()
 
-    -- Move all items to the character
+    -- Equip all items by moving them to the character
     for _, item in ipairs(backpack) do
         if item:IsA("Tool") then
-            -- Move the item to the character's hand
+            -- Equip the item to the character (i.e., move it to the character's hand)
             item.Parent = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
         end
     end
