@@ -51,3 +51,13 @@ local function toggleHighlights()
         end
     end
 end
+
+-- You need to link this script with the ESP toggle in the existing Rayfield window.
+-- The callback of the existing ESP toggle will update `highlightEnabled` and call `toggleHighlights`.
+
+-- Assuming the ESP toggle callback looks something like this:
+-- ESP Toggle (in your existing Rayfield code, not here)
+-- ESP Toggle.Callback = function(Value)
+--     highlightEnabled = Value
+--     toggleHighlights()
+-- end
