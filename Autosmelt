@@ -31,6 +31,17 @@ local function claimSmeltedObjects()
     end
 end
 
+-- Function to check if a tool name contains any of the excluded words
+local function isExcluded(toolName)
+    local excludedWords = {"Book", "Pack", "Detector", "Shovel", "Xray Vision"}
+    for _, word in ipairs(excludedWords) do
+        if string.find(toolName, word) then
+            return true
+        end
+    end
+    return false
+end
+
 -- Function to cycle through and smelt all tools in the Backpack
 local function autoSmeltTools()
     local backpack = player:WaitForChild("Backpack")
@@ -38,8 +49,8 @@ local function autoSmeltTools()
     -- Iterate through each tool in the Backpack
     while true do
         for _, tool in ipairs(backpack:GetChildren()) do
-            if tool:IsA("Tool") then
-                -- Smelt the tool
+            if tool:IsA("Tool") and not isExcluded(tool.Name) then
+                -- Smelt the tool if it's not excluded
                 addSmeltingObject(tool)
                 print("Smelting " .. tool.Name)
                 task.wait(1) -- Wait 1 second before smelting the next tool
