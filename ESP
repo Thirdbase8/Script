@@ -1,34 +1,4 @@
--- Initialize Toggle for ESP
-local Toggle = Tab:CreateToggle({
-   Name = "ESP",
-   CurrentValue = false,  -- Default to false (ESP disabled)
-   Flag = "ESP_Toggle", 
-   Callback = function(Value)
-      _G.ShowLootNames = Value  -- Set global flag based on toggle
-      if Value then
-         -- When ESP is enabled, connect to Heartbeat and start updating loot names
-         if not connection then
-            connection = game:GetService("RunService").Heartbeat:Connect(function()
-               if _G.ShowLootNames then
-                  updateNameDisplays()
-               else
-                  clearAll()
-               end
-            end)
-         end
-      else
-         -- When ESP is disabled, disconnect from Heartbeat and clear loot names
-         if connection then
-            connection:Disconnect()
-            connection = nil
-         end
-         clearAll()
-      end
-   end,
-})
-
--- ESP Loot Names Display Script:
-_G.ShowLootNames = false  -- Default value to start with
+_G.ShowLootNames = true -- Toggle for Loot Names
 
 local nameFolder = Instance.new("Folder")
 nameFolder.Name = "0x" .. tostring(math.random(10000, 99999))
@@ -69,3 +39,27 @@ local function updateNameDisplays()
         end
     end
 end
+
+local debounce = false
+
+local connection
+if _G.ShowLootNames then
+    connection = game:GetService("RunService").Heartbeat:Connect(function()
+        if not debounce then
+            debounce = true
+            updateNameDisplays()
+            task.wait(0.5) -- Adjust delay for performance
+            debounce = false
+        end
+    end)
+end
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    if not _G.ShowLootNames then
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+        clearAll()
+    end
+end)
