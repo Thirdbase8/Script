@@ -1,15 +1,35 @@
-autoSmeltEnabled = autoSmeltEnabled or false  -- Keep the variable persistent
+local autoSmeltEnabled = true
 
-function autoSmelt()
-    while autoSmeltEnabled do
-        local success, result = pcall(function()
-            loadstring(game:HttpGet('https://raw.githubusercontent.com/Thirdbase8/Script/refs/heads/main/Smelt%20item'))()
-        end)
-
-        if not success then
-            warn("Error running Auto Smelt: " .. result)
-        end
-
-        task.wait(5) -- Smelts every 5 seconds
+-- Function to smelt items
+local function smeltItem(item)
+    -- Here you define how the item smelting process should work
+    -- Example: remove the item or change its properties
+    if item and item.Parent then
+        item:Destroy()  -- This is just an example action
+        print(item.Name .. " has been smelted!")
     end
+end
+
+-- Main loop that continuously checks for items to smelt
+while autoSmeltEnabled do
+    -- Get all items in the Backpack
+    local backpack = game.Players.LocalPlayer.Backpack:GetChildren()
+
+    -- Move all items to the character
+    for _, item in ipairs(backpack) do
+        if item:IsA("Tool") then
+            -- Move the item to the character's hand
+            item.Parent = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+        end
+    end
+
+    -- Now, smelt all items in the character's inventory
+    local characterItems = game.Players.LocalPlayer.Character:GetChildren()
+    for _, item in ipairs(characterItems) do
+        if item:IsA("Tool") then
+            smeltItem(item)
+        end
+    end
+
+    task.wait(5)  -- Wait for 5 seconds before checking again
 end
