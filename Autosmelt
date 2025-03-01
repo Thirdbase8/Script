@@ -1,50 +1,45 @@
-local autoSmeltEnabled = true
+local player = game.Players.LocalPlayer
+local replicatedStorage = game:GetService("ReplicatedStorage")
 
--- List of keywords to filter out
-local excludedKeywords = {"pack", "book", "xray vision", "Shovel", "detector"}
+-- Function to add smelting objects for each tool in the Backpack
+local function addSmeltingObjects()
+    -- Iterate over all tools in the Backpack
+    local backpack = player:WaitForChild("Backpack")
 
--- Function to check if the item's name contains any excluded keywords
-local function isExcluded(item)
-    for _, keyword in ipairs(excludedKeywords) do
-        if string.lower(item.Name):find(string.lower(keyword)) then
-            return true
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            -- Create a new Tool instance and smelt it
+            replicatedStorage:WaitForChild("Add_Smelting_Object"):FireServer(tool)
+            print("Smelting " .. tool.Name)
         end
-    end
-    return false
-end
-
--- Function to smelt items
-local function smeltItem(item)
-    -- Define what should happen when the item is smelted
-    -- Example: Remove the item or alter its properties
-    if item and item.Parent then
-        item:Destroy()  -- Example: Destroy the item to simulate smelting
-        print(item.Name .. " has been smelted!")
     end
 end
 
--- Main loop for auto smelting
-while autoSmeltEnabled do
-    -- Get all items in the Backpack of the LocalPlayer
-    local backpack = game.Players.LocalPlayer.Backpack:GetChildren()
+-- Function to claim smelted objects
+local function claimSmeltedObjects()
+    local smeltingFolder = player:FindFirstChild("Smelting_Folder")
 
-    -- Equip all tools from the Backpack (make sure it's a Tool and not excluded)
-    for _, item in ipairs(backpack) do
-        if item:IsA("Tool") and not isExcluded(item) then
-            -- Move the tool to the character to equip it
-            item.Parent = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-            print("Equipped " .. item.Name)
-        end
+    if not smeltingFolder then
+        warn("Smelting_Folder not found for player.")
+        return
     end
 
-    -- Now, smelt all tools equipped on the character
-    local characterItems = game.Players.LocalPlayer.Character:GetChildren()
-    for _, item in ipairs(characterItems) do
-        if item:IsA("Tool") and not isExcluded(item) then
-            smeltItem(item)
+    -- Iterate over all smelted items and claim them
+    for _, target in ipairs(smeltingFolder:GetChildren()) do
+        if target:IsA("NumberValue") then
+            local id = target:FindFirstChild("ID")
+            
+            if id and id:IsA("NumberValue") then
+                replicatedStorage:WaitForChild("Claim_Smelted_Object"):FireServer(target.Name, id.Value)
+                print("Claimed " .. target.Name)
+            else
+                warn("No valid ID found for " .. target.Name)
+            end
         end
     end
-
-    -- Wait for 5 seconds before checking again
-    task.wait(5)
 end
+
+-- Execute the sequence to smelt multiple tools
+addSmeltingObjects()
+task.wait(0.5) -- Wait before claiming
+claimSmeltedObjects()
