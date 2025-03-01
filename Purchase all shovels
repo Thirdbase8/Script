@@ -1,0 +1,14 @@
+-- Get the Shovels folder from ReplicatedStorage
+local shovelsFolder = game.ReplicatedStorage:WaitForChild("Shovels")
+
+-- Loop through all tools inside the Shovels folder
+for _, tool in pairs(shovelsFolder:GetChildren()) do
+    -- Ensure the tool is a valid object (e.g., a tool model or part)
+    if tool:IsA("Tool") then
+        -- Create the args table with the tool's name
+        local args = {tool.Name}
+        
+        -- Fire the RemoteEvent for the tool
+        game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Display_Frame"):WaitForChild("Shop_Purchase"):WaitForChild("Lower_Frame"):WaitForChild("TextButton"):WaitForChild("Interior"):WaitForChild("RemoteEvent"):FireServer(unpack(args))
+    end
+end
