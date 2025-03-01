@@ -1,0 +1,15 @@
+autoSmeltEnabled = autoSmeltEnabled or false  -- Keep the variable persistent
+
+function autoSmelt()
+    while autoSmeltEnabled do
+        local success, result = pcall(function()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/Thirdbase8/Script/refs/heads/main/Smelt%20item'))()
+        end)
+
+        if not success then
+            warn("Error running Auto Smelt: " .. result)
+        end
+
+        task.wait(5) -- Smelts every 5 seconds
+    end
+end
