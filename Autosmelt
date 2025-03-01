@@ -1,11 +1,10 @@
 local player = game.Players.LocalPlayer
 local replicatedStorage = game:GetService("ReplicatedStorage")
 
--- Function to add smelting objects for each tool in the Backpack
-local function smeltTool(tool)
+-- Function to add a new smelting object
+local function addSmeltingObject(tool)
     -- Send the tool to the smelting system
     replicatedStorage:WaitForChild("Add_Smelting_Object"):FireServer(tool)
-    print("Smelting " .. tool.Name)
 end
 
 -- Function to claim smelted objects
@@ -33,22 +32,28 @@ local function claimSmeltedObjects()
 end
 
 -- Function to cycle through and smelt all tools in the Backpack
-local function smeltAllTools()
+local function autoSmeltTools()
     local backpack = player:WaitForChild("Backpack")
 
     -- Iterate through each tool in the Backpack
-    for _, tool in ipairs(backpack:GetChildren()) do
-        if tool:IsA("Tool") then
-            -- Smelt each tool individually
-            smeltTool(tool)
-            task.wait(1) -- Wait 1 second before smelting the next tool
+    while true do
+        for _, tool in ipairs(backpack:GetChildren()) do
+            if tool:IsA("Tool") then
+                -- Smelt the tool
+                addSmeltingObject(tool)
+                print("Smelting " .. tool.Name)
+                task.wait(1) -- Wait 1 second before smelting the next tool
+            end
         end
+        
+        -- After smelting all tools, claim the smelted objects
+        task.wait(1) -- Wait before claiming
+        claimSmeltedObjects()
+        
+        -- Wait for a little bit before checking the Backpack again
+        task.wait(5) -- Adjust this delay based on how fast you want to auto-smelt
     end
-
-    -- After all tools are smelted, claim the smelted objects
-    task.wait(1) -- Wait for smelting to complete before claiming
-    claimSmeltedObjects()
 end
 
--- Execute the sequence to smelt and claim all tools
-smeltAllTools()
+-- Start the auto-smelting process
+autoSmeltTools()
