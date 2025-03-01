@@ -1,0 +1,4 @@
+local args = {
+	100
+}
+game:GetService("ReplicatedStorage"):WaitForChild("Purchase_Crate"):FireServer(unpack(args))
