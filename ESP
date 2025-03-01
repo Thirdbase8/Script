@@ -52,29 +52,23 @@ local function toggleHighlights()
     end
 end
 
--- Listen for the toggle control from Rayfield (or any other method)
+-- Ensure the Rayfield GUI window exists before creating the toggle
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local Window = Rayfield:CreateWindow({
-   Name = "Highlight Control",
-   Icon = 0,
-   LoadingTitle = "Highlight Toggle",
-   LoadingSubtitle = "by Hugh Man",
-   Theme = "Default"
-})
+local Window = Rayfield:GetWindow()
 
-local Tab = Window:CreateTab("Main Features", 4483362458)
+local Tab = Window:CreateTab("Main Features", 4483362458)  -- Use existing tab
 
--- Highlight Toggle (connect this to the toggle button in Rayfield GUI)
-local ToggleHighlight = Tab:CreateToggle({
-   Name = "Toggle Loot Highlight",
-   CurrentValue = false,  -- Highlight is initially off
-   Flag = "LootHighlightToggle",
+-- ESP Toggle (This will now control the highlight toggle)
+local ToggleESP = Tab:CreateToggle({
+   Name = "ESP",
+   CurrentValue = false,  -- ESP is initially off
+   Flag = "ToggleESP", 
    Callback = function(Value)
-      highlightEnabled = Value
+      highlightEnabled = Value  -- Update highlightEnabled based on ESP toggle
       toggleHighlights()  -- Call the function to update the highlights
    end
 })
 
--- Load Configuration
+-- Load Configuration (ensures the Rayfield configuration is loaded)
 Rayfield:LoadConfiguration()
