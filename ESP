@@ -1,31 +1,11 @@
-_G.ShowLootNames = true -- Toggle for Loot Names
--- Roblox Script to toggle highlighting of all objects in the Loot folder
+-- Highlight script for Loot folder in Roblox
 
-local nameFolder = Instance.new("Folder")
-nameFolder.Name = "0x" .. tostring(math.random(10000, 99999))
-nameFolder.Parent = workspace
 -- Get the Loot folder in Workspace
 local lootFolder = game.Workspace:WaitForChild("Loot")
 
-local function createNameDisplay(loot)
-    local billboard = Instance.new("BillboardGui")
-    billboard.Adornee = loot
-    billboard.Size = UDim2.new(4, 0, 1, 0)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = loot
--- Store the current state of highlighting
-local highlightEnabled = true
+-- State variable to track highlight toggle
+local highlightEnabled = false
 
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.BackgroundTransparency = 1
-    textLabel.Text = loot.Name
-    textLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
-    textLabel.TextStrokeTransparency = 0.5
-    textLabel.TextScaled = true
-    textLabel.Font = Enum.Font.GothamBold
-    textLabel.Parent = billboard
 -- Function to create a highlight for each object
 local function createHighlight(object)
     -- Check if the object already has a highlight to avoid duplicates
@@ -41,13 +21,7 @@ local function createHighlight(object)
     end
 end
 
-local function clearAll()
-    for _, loot in ipairs(workspace.Loot:GetChildren()) do
-        local billboard = loot:FindFirstChildWhichIsA("BillboardGui")
-        if billboard then
-            billboard:Destroy()
-        end
--- Function to remove the highlights
+-- Function to remove highlight from an object
 local function removeHighlight(object)
     local highlight = object:FindFirstChild("Highlight")
     if highlight then
@@ -55,70 +29,52 @@ local function removeHighlight(object)
     end
 end
 
-local function updateNameDisplays()
-    for _, loot in ipairs(workspace.Loot:GetChildren()) do
-        if loot:IsA("Model") and not loot:FindFirstChildWhichIsA("BillboardGui") then
-            createNameDisplay(loot)
--- Function to toggle highlights
+-- Function to toggle highlights on/off
 local function toggleHighlights()
-    highlightEnabled = not highlightEnabled
     if highlightEnabled then
-        -- Reapply highlights to all objects in Loot
+        -- Add highlights to all items in Loot folder
         for _, item in pairs(lootFolder:GetChildren()) do
             createHighlight(item)
         end
+
+        lootFolder.ChildAdded:Connect(function(child)
+            createHighlight(child)
+        end)
+
+        lootFolder.ChildRemoved:Connect(function(child)
+            removeHighlight(child)
+        end)
     else
-        -- Remove highlights from all objects in Loot
+        -- Remove highlights from all items in Loot folder
         for _, item in pairs(lootFolder:GetChildren()) do
             removeHighlight(item)
         end
     end
 end
 
-local debounce = false
+-- Listen for the toggle control from Rayfield (or any other method)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local connection
-if _G.ShowLootNames then
-    connection = game:GetService("RunService").Heartbeat:Connect(function()
-        if not debounce then
-            debounce = true
-            updateNameDisplays()
-            task.wait(0.5) -- Adjust delay for performance
-            debounce = false
-        end
-    end)
--- Initial highlight setup when the script starts
-if highlightEnabled then
-    for _, item in pairs(lootFolder:GetChildren()) do
-        createHighlight(item)
-    end
-end
+local Window = Rayfield:CreateWindow({
+   Name = "Highlight Control",
+   Icon = 0,
+   LoadingTitle = "Highlight Toggle",
+   LoadingSubtitle = "by Hugh Man",
+   Theme = "Default"
+})
 
-game:GetService("RunService").Heartbeat:Connect(function()
-    if not _G.ShowLootNames then
-        if connection then
-            connection:Disconnect()
-            connection = nil
-        end
-        clearAll()
--- Listen for any new items added to the Loot folder and add or remove highlights
-lootFolder.ChildAdded:Connect(function(child)
-    if highlightEnabled then
-        createHighlight(child)
-    end
-end)
+local Tab = Window:CreateTab("Main Features", 4483362458)
 
-lootFolder.ChildRemoved:Connect(function(child)
-    if highlightEnabled then
-        removeHighlight(child)
-    end
-end)
+-- Highlight Toggle (connect this to the toggle button in Rayfield GUI)
+local ToggleHighlight = Tab:CreateToggle({
+   Name = "Toggle Loot Highlight",
+   CurrentValue = false,  -- Highlight is initially off
+   Flag = "LootHighlightToggle",
+   Callback = function(Value)
+      highlightEnabled = Value
+      toggleHighlights()  -- Call the function to update the highlights
+   end
+})
 
--- Bind the toggle to a key press (for example, "T" key)
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-
-    if input.KeyCode == Enum.KeyCode.T then
-        toggleHighlights()
-    end
-end)
+-- Load Configuration
+Rayfield:LoadConfiguration()
