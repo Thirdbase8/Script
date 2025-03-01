@@ -1,0 +1,14 @@
+-- Get the Metal_Detectors folder from ReplicatedStorage
+local metalDetectorsFolder = game.ReplicatedStorage:WaitForChild("Metal_Detectors")
+
+-- Loop through all items inside the Metal_Detectors folder
+for _, item in pairs(metalDetectorsFolder:GetChildren()) do
+    -- Ensure the item is a valid object (e.g., a tool or part)
+    if item:IsA("Tool") then
+        -- Create the args table with the item's name
+        local args = {item.Name}
+        
+        -- Fire the RemoteEvent for the item
+        game:GetService("Players").LocalPlayer.PlayerGui.Display_Frame.Shop_Purchase.Lower_Frame.TextButton.Interior.RemoteEvent:FireServer(unpack(args))
+    end
+end
