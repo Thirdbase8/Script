@@ -2,28 +2,29 @@ local autoSmeltEnabled = true
 
 -- Function to smelt items
 local function smeltItem(item)
-    -- Here you define how the item smelting process should work
-    -- Example: remove the item or change its properties
+    -- Define what should happen when the item is smelted
+    -- Example: Remove the item or alter its properties
     if item and item.Parent then
-        item:Destroy()  -- This is just an example action
+        item:Destroy()  -- Example: Destroy the item to simulate smelting
         print(item.Name .. " has been smelted!")
     end
 end
 
--- Main loop that continuously checks for items to smelt
+-- Main loop for auto smelting
 while autoSmeltEnabled do
-    -- Get all items in the Backpack
+    -- Get all items in the Backpack of the LocalPlayer
     local backpack = game.Players.LocalPlayer.Backpack:GetChildren()
 
-    -- Equip all items by moving them to the character
+    -- Equip all tools from the Backpack (make sure it's a Tool)
     for _, item in ipairs(backpack) do
         if item:IsA("Tool") then
-            -- Equip the item to the character (i.e., move it to the character's hand)
+            -- Move the tool to the character to equip it
             item.Parent = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+            print("Equipped " .. item.Name)
         end
     end
 
-    -- Now, smelt all items in the character's inventory
+    -- Now, smelt all tools equipped on the character
     local characterItems = game.Players.LocalPlayer.Character:GetChildren()
     for _, item in ipairs(characterItems) do
         if item:IsA("Tool") then
@@ -31,5 +32,6 @@ while autoSmeltEnabled do
         end
     end
 
-    task.wait(5)  -- Wait for 5 seconds before checking again
+    -- Wait for 5 seconds before checking again
+    task.wait(5)
 end
