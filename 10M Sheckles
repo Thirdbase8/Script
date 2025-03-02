@@ -1,5 +1,5 @@
 local args = {
-    [1] = -1000
+    [1] = -999
 }
 
 game:GetService("ReplicatedStorage").Purchase_Legendary_Crate:FireServer(unpack(args))
